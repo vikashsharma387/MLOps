@@ -52,11 +52,11 @@ jobs:
           path: models/heart_model.pkl
           retention-days: 7
 
-      - name: 📤 Upload MLflow Database Artifact
+      - name: 📤 Upload MLflow Runs Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: mlflow-experiment-db
-          path: mlflow.db
+          name: mlflow-experiment-runs
+          path: mlruns/
           retention-days: 7
 
   # =========================================================================

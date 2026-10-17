@@ -23,7 +23,11 @@ def train_and_track():
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     data_path = os.path.join(base_dir, "data", "heart.csv")
     models_dir = os.path.join(base_dir, "models")
+    mlruns_dir = os.path.join(base_dir, "mlruns")
+    mlflow_db = os.path.join(base_dir, "mlflow.db")
+
     os.makedirs(models_dir, exist_ok=True)
+    os.makedirs(mlruns_dir, exist_ok=True)
 
     print(f"Loading data from {data_path}...")
     X, y = load_and_split_data(data_path)
@@ -33,10 +37,19 @@ def train_and_track():
         X, y, test_size=0.20, random_state=42, stratify=y
     )
 
-    # Configure MLflow Tracking
-    mlflow_db = os.path.join(base_dir, "mlflow.db")
-    mlflow.set_tracking_uri(f"sqlite:///{mlflow_db}")
-    mlflow.set_experiment("HeartDiseasePrediction")
+    # Configure SQLite MLflow Tracking backend
+    tracking_uri = f"sqlite:///{mlflow_db}"
+    mlflow.set_tracking_uri(tracking_uri)
+
+    experiment_name = "HeartDiseasePrediction"
+    client = mlflow.tracking.MlflowClient()
+    experiment = client.get_experiment_by_name(experiment_name)
+    if experiment is None:
+        client.create_experiment(
+            name=experiment_name,
+            artifact_location=mlruns_dir
+        )
+    mlflow.set_experiment(experiment_name)
 
     preprocessor = build_preprocessor()
 
